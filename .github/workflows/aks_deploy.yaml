@@ -35,4 +35,10 @@ jobs:
           creds: '${{ secrets.AZURE_CREDENTIALS }}'
           cluster-name: cprime-cluster
           resource-group: cprime-rg
+      - uses: Azure/k8s-create-secret@v1
+        with:
+          container-registry-url: cloudlifeacr.azurecr.io
+          container-registry-username: ${{ secrets.ACR_USERNAME }}
+          container-registry-password: ${{ secrets.ACR_PASSWORD }}
+          secret-name: k8s-secret
     
