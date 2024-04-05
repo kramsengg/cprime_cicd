@@ -1,12 +1,25 @@
 name: AKS-Deployment
 on:
-  push:
-    branches:
-    - main
+  workflow_run:
+    workflows: ["First-Workflow"]
+    types:
+      - completed
+  # push:
+  #   branches:
+  #   - main
   workflow_dispatch:
 jobs:
+  codacy-analysis-cli:
+    name: Codacy Analysis CLI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run Codacy Analysis CLI
+        uses: codacy/codacy-analysis-cli-action@master
   build:
     runs-on: ubuntu-latest
+    needs: codacy-analysis-cli
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.10.14
@@ -18,19 +31,24 @@ jobs:
           cd app
           python3 -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Build and Push the app images to ACR 
+      - name: Authenticate with ACR 
         uses: Azure/docker-login@v1
         with:
             login-server: cprimecontainerregistry.azurecr.io
             username: ${{ secrets.ACR_USERNAME }}
             password: ${{ secrets.ACR_PASSWORD }}
-      - run: |
+      - name: Build and Push the app images to ACR 
+        run: |
             cd app
             docker build . -t cprimecontainerregistry.azurecr.io/cprime-flask:${{ github.sha }}
             docker push cprimecontainerregistry.azurecr.io/cprime-flask:${{ github.sha }}
-      
+      - name: Scan for vulnerabilities
+        uses: crazy-max/ghaction-container-scan@v3
+        with:
+          image: cprimecontainerregistry.azurecr.io/cprime-flask:${{ github.sha }}
   deploy:
     runs-on: ubuntu-latest
+    needs: build
     steps:       
       # Set the target AKS cluster.
       - name: Set AKS Cluster context
