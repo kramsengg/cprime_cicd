@@ -1,4 +1,4 @@
-name: First-Workflow
+name: Terraform-Deployment
 on:
   push:
     branches:
@@ -18,3 +18,31 @@ jobs:
           cd app
           python3 -m pip install --upgrade pip
           pip install -r requirements.txt
+  terraform:
+    runs-on: ubuntu-latest
+    steps:                    
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+
+      - name: 'Set up Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: 'Set up Terraform'
+        uses: hashicorp/setup-terraform@v1
+
+      - name: 'Terraform Init'
+        run: terraform init
+
+      - name: 'Terraform Format'
+        run: terraform fmt -check
+      
+      - name: 'Terraform Validate'
+        run: terrform validate
+      - name: 'Terraform Plan'
+        run: terraform plan -out=tfplan
+
+      - name: 'Terraform Apply'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve tfplan

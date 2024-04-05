@@ -1,7 +1,7 @@
 name: AKS-Deployment
 on:
   workflow_run:
-    workflows: ["First-Workflow"]
+    workflows: ["Terraform-Deployment"]
     types:
       - completed
   # push:

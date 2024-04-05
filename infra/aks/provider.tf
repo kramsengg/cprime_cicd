@@ -5,6 +5,13 @@ terraform {
       version = "=3.98.0"
     }
   }
+
+  backend "azurerm" {
+    resource_group_name   = "tfstate"
+    storage_account_name  = "tfstatecprime"
+    container_name        = "cprimestate"
+    key                   = "cprime.terraform.tfstate"
+  }
 }
 
 # Configure the Microsoft Azure Provider
