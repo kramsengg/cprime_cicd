@@ -1,5 +1,7 @@
 # cprime_cicd
 
+![Alt text](diagrams/cprime_ci_cd.png)
+
 # Create a resource group
 az group create --name cprime-rg --location eastus
 
