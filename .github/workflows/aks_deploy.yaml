@@ -4,9 +4,9 @@ on:
     workflows: ["First-Workflow"]
     types:
       - completed
-  push:
-    branches:
-    - main
+  # push:
+  #   branches:
+  #   - main
   workflow_dispatch:
 jobs:
   codacy-analysis-cli:
