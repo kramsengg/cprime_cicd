@@ -26,5 +26,6 @@ jobs:
             username: ${{ secrets.ACR_USERNAME }}
             password: ${{ secrets.ACR_PASSWORD }}
       - run: |
+            cd app
             docker build . -t cprimecontainerregistry.azurecr.io/cprimeflask:${{ github.sha }}
             docker push cprimecontainerregistry.azurecr.io/cprimeflask:${{ github.sha }}
