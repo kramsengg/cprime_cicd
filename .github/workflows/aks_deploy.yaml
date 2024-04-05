@@ -29,3 +29,10 @@ jobs:
             cd app
             docker build . -t cprimecontainerregistry.azurecr.io/cprimeflask:${{ github.sha }}
             docker push cprimecontainerregistry.azurecr.io/cprimeflask:${{ github.sha }}
+      # Set the target AKS cluster.
+      - uses: Azure/aks-set-context@v1
+        with:
+          creds: '${{ secrets.AZURE_CREDENTIALS }}'
+          cluster-name: cprime-cluster
+          resource-group: cprime-rg
+    
