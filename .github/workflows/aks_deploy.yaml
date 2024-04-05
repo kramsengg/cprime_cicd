@@ -1,0 +1,64 @@
+name: AKS-Deployment
+on:
+  push:
+    branches:
+    - main
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.10.14
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.10.14
+      - name: Install Dependencies for the app
+        run: |
+          cd app
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Build and Push the app images to ACR 
+        uses: Azure/docker-login@v1
+        with:
+            login-server: cprimecontainerregistry.azurecr.io
+            username: ${{ secrets.ACR_USERNAME }}
+            password: ${{ secrets.ACR_PASSWORD }}
+      - run: |
+            cd app
+            docker build . -t cprimecontainerregistry.azurecr.io/cprime-flask:${{ github.sha }}
+            docker push cprimecontainerregistry.azurecr.io/cprime-flask:${{ github.sha }}
+      
+  deploy:
+    runs-on: ubuntu-latest
+    steps:       
+      # Set the target AKS cluster.
+      - name: Set AKS Cluster context
+        uses: Azure/aks-set-context@v1
+        with:
+          creds: '${{ secrets.AZURE_CREDENTIALS }}'
+          cluster-name: cprime-cluster
+          resource-group: cprime-rg
+      
+      - name: Set image tag to commit SHA
+        run: |
+            sed -i 's|cprimecontainerregistry.azurecr.io/cprime-flask:.*|cprimecontainerregistry.azurecr.io/cprime-flask:${{ github.sha }}|' k8s/deployment.yaml
+            cat k8s/deployment.yaml
+      
+      - name: Create secrets in AKS cluster to authenticate with ACR
+        uses: Azure/k8s-create-secret@v1
+        with:
+          container-registry-url: cprimecontainerregistry.azurecr.io
+          container-registry-username: ${{ secrets.ACR_USERNAME }}
+          container-registry-password: ${{ secrets.ACR_PASSWORD }}
+          secret-name: k8s-secret
+      - name: Application deployment in AKS cluster
+        uses: Azure/k8s-deploy@v1
+        with:
+          manifests: |
+            k8s/deployment.yaml
+            k8s/service.yaml
+          images: |
+            cprimecontainerregistry.azurecr.io/cprime-flask:${{ github.sha }}
+          imagepullsecrets: |
+            k8s-secret

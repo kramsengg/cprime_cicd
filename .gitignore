@@ -1,0 +1,7 @@
+diagrams/
+infra/aks/.terraform
+infra/aks/.terraform.lock.hcl
+infra/aks/aks.plan
+infra/aks/terraform.tfstate
+infra/aks/terraform.tfstate.backup
+
