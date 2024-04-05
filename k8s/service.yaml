@@ -4,7 +4,7 @@ metadata:
   name:  cprime-flask-svc
 spec:
   selector:
-    app:  flask
+    app:  cprime
   type:  LoadBalancer
   ports:
   - name:  http
