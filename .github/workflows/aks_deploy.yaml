@@ -27,14 +27,17 @@ jobs:
             password: ${{ secrets.ACR_PASSWORD }}
       - run: |
             cd app
-            docker build . -t cprimecontainerregistry.azurecr.io/cprimeflask:${{ github.sha }}
-            docker push cprimecontainerregistry.azurecr.io/cprimeflask:${{ github.sha }}
+            docker build . -t cprimecontainerregistry.azurecr.io/cprime-flask:${{ github.sha }}
+            docker push cprimecontainerregistry.azurecr.io/cprime-flask:${{ github.sha }}
       # Set the target AKS cluster.
       - uses: Azure/aks-set-context@v1
         with:
           creds: '${{ secrets.AZURE_CREDENTIALS }}'
           cluster-name: cprime-cluster
           resource-group: cprime-rg
+      - name: Set image tag to commit SHA
+        run: |
+            sed -i 's|cprimecontainerregistry.azurecr.io/cprime-flask:.*|cprimecontainerregistry.azurecr.io/cprime-flask:${{ github.sha }}|' k8s/deployment.yaml
       - uses: Azure/k8s-create-secret@v1
         with:
           container-registry-url: cprimecontainerregistry.azurecr.io
@@ -44,9 +47,9 @@ jobs:
       - uses: Azure/k8s-deploy@v1
         with:
           manifests: |
-            manifests/deployment.yaml
-            manifests/service.yaml
+            k8s/deployment.yaml
+            k8s/service.yaml
           images: |
-            cprimecontainerregistry.azurecr.io/k8sflask:${{ github.sha }}
+            cprimecontainerregistry.azurecr.io/cprime-flask:${{ github.sha }}
           imagepullsecrets: |
             k8s-secret

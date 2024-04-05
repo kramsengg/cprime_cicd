@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cprime-flask
+  labels:
+    app: cprime
+    env: dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cprime
+  template:
+    metadata:
+      labels:
+        app: cprime
+        env: dev
+    spec:
+      containers:
+      - name: cprime-flask
+        image: cprimecontainerregistry.azurecr.io/cprime-flask:${{ github.sha }}
+        ports:
+        - name:  http
+          containerPort: 8080
+          protocol: TCP
