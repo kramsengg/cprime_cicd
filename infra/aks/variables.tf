@@ -35,3 +35,24 @@ variable "node_count" {
 variable "vm_size" {
   default = "Standard_DS2_v2"
 }
+
+
+variable "arm_client_id" {
+  description = "The Client ID for the service principal."
+  type        = string
+}
+
+variable "arm_client_secret" {
+  description = "The Client Secret for the service principal."
+  type        = string
+}
+
+variable "arm_subscription_id" {
+  description = "The subscription id for the service principal."
+  type        = string
+}
+
+variable "arm_tenant_id" {
+  description = "The tenant id for the service principal."
+  type        = string
+}
