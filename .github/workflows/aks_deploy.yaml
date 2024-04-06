@@ -60,6 +60,7 @@ jobs:
       
       - name: Set image tag to commit SHA
         run: |
+            pwd
             sed -i 's|cprimecontainerregistry.azurecr.io/cprime-flask:.*|cprimecontainerregistry.azurecr.io/cprime-flask:${{ github.sha }}|' k8s/deployment.yaml
                   
       - name: Create secrets in AKS cluster to authenticate with ACR
