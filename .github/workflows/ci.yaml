@@ -33,7 +33,8 @@ jobs:
       # - name: 'Set up Azure CLI'
       #   uses: azure/login@v1
       #   with:
-      #     creds: 
+      #     creds: ${{secrets.AZURE_CREDENTIALS}}
+        
 
       - name: 'Set up Terraform'
         uses: hashicorp/setup-terraform@v1
@@ -41,6 +42,7 @@ jobs:
       - name: 'Terraform Init'
         run: | 
           cd infra/aks
+          az login
           terraform init
 
       - name: 'Terraform Format'
