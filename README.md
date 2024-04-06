@@ -1,46 +1,59 @@
-# cprime_cicd
+# CPRIME - DEVOPS - EXERCISE
+# Repository Overview
+This GitHub repository is structured to facilitate DevOps practices for a sample Python-Flask application. It includes the following components:
 
+- **Sample Python-Flask Application**: Demonstrates containerization by displaying the container name and IP address.
+- **Dockerfile**: Provides instructions for building a Docker image of the application.
+- **Terraform Scripts**: A collection of scripts to provision an Azure Kubernetes Service (AKS) cluster infrastructure. These scripts are intended for one-time execution.
+- **Kubernetes Manifest Files**: Contains the necessary files to deploy the application and its services on AKS.
+- **CI/CD Workflow Files**: Located under the .github/workflows directory, these files define the GitHub Actions workflows for continuous integration and continuous deployment of the application:
+    - aks_deploy.yaml
+    - terraform.yaml
+# Sample Application
+The sample application is containerized for easy deployment and scaling within Kubernetes environments.
+
+# CI/CD 
 ![Alt text](cprime_ci_cd.png)
 
+# Sample Web Application
+![Alt text](app.png)
 
-# Create a resource group
+# AKS Cluster Creation with Terraform
+Terraform scripts for creating the AKS cluster are located in the infra/aks directory. The ci.yaml workflow automates the creation of the AKS cluster and associated resources within the Azure portal.
+
+# Secrets and Variables Settings
+The following table outlines the secrets and variables required for the workflows, along with their respective placeholders:
+
+| Secret Name | Secret Value | Comments |
+|-------------|--------------|----------|
+|ACR_USERNAME|${{ secrets.ACR_USERNAME }}|Azure Container Registry Admin username|
+|ACR_PASSWORD|${{ secrets.ACR_PASSWORD }}|Azure Container Registry password|
+|AZURE_CREDENTIALS|${{ secrets.AZURE_CREDENTIALS }}|Azure service principal credentials|
+|ARM_CLIENT_ID|${{ secrets.ARM_CLIENT_ID }}|Azure service principal client ID|
+|ARM_CLIENT_SECRET|${{ secrets.ARM_CLIENT_SECRET }}|Azure service principal client secret|
+|ARM_SUBSCRIPTION_ID|${{ secrets.ARM_SUBSCRIPTION_ID }}|Azure subscription ID|
+|ARM_TENANT_ID|${{ secrets.ARM_TENANT_ID }}|Azure tenant ID|
+# AKS Cluster Creation using Azure CLI
+The following commands are used to create and manage the AKS cluster via the Azure CLI:
+
+# Create a Resource Group
+```sh
 az group create --name cprime-rg --location eastus
-
-# Create a container registry
+```
+# Create a Container Registry
+```sh
 az acr create --resource-group cprime-rg --name cprimecontainerregistry --sku Basic
-
-# Create a Kubernetes cluster
+```
+# Create a Kubernetes Cluster
+```sh
 az aks create --resource-group cprime-rg --name cprime-cluster --node-count 2 --enable-addons monitoring --generate-ssh-keys
-
-# Clean up
+```
+# Clean Up Resources
+```sh
 az group delete --name cprime-rg
-
-# AKS Cluster access from local:
-
+```
+# Access AKS Cluster from Local Machine
+```sh
 az aks get-credentials --resource-group cprime-rg --name cprime-cluster
-Merged "cprime-cluster" as current context in /home/ramachandrank/.kube/config
-
-kubectl get nodes
-
-# Create Admin Username & Password:
-Enable Admin User on ACR:
-• Go to the Azure portal.
-• Navigate to your ACR instance.
-• Under ‘Settings’, select ‘Access keys’.
-Enable the ‘Admin user’. This will generate a username and password for your registry1.
-
-env:
-ACR_USERNAME:${{secrets.ACR_USERNAME}}
-ACR_PASSWORD:${{secrets.ACR_PASSWORD}}
-
-# Create Service Principal (Optional): 
-If you prefer not to use the admin user, you can create a service principal with access to your container registry:
-
-az ad sp create-for-rbac --name <service-principal-name> --scopes <acr-resource-id> --role acrpush
-
-# AZURE Credentials
-
-Create a Service Principal: Open Azure Cloud Shell or use Azure CLI locally and run the following command to create a new Service Principal. This command will output a JSON object with your new Service Principal’s credentials.
-az ad sp create-for-rbac --name "cprime-cluster-sp" --role "contributor" --scopes /subscriptions/<Sub-ID> --sdk-auth
-
-AZURE_CREDENTIALS: ${{secrets.AZURE_CREDENTIALS}}
+```
+> Ensure that all placeholders are replaced with actual values before executing the commands or workflows. The repository is designed to streamline the development and operations lifecycle of the sample application through automation and best practices in cloud-native deployment.
