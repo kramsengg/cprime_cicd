@@ -47,6 +47,7 @@ jobs:
 
       - name: 'Terraform Init'
         run: | 
+          az ad sp list --all
           az account list
           cd infra/aks
           terraform init
