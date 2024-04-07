@@ -13,7 +13,8 @@ This GitHub repository is structured to facilitate DevOps practices for a sample
 The sample application is containerized for easy deployment and scaling within Kubernetes environments.
 
 # CI/CD 
-![Alt text](cprime_ci_cd.png)
+
+![Alt text](git_to_aks_workflow.png)
 
 # Sample Web Application
 ![Alt text](app.png)

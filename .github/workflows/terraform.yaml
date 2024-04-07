@@ -2,52 +2,71 @@ name: Terraform-Deployment
 on:
   push:
     branches:
-    - main
+      - main
+    paths:
+      - 'infra/aks/**'
   workflow_dispatch:
+    inputs:
+      terraform_action:
+        description: 'Action apply/plan'
+        required: true
+        default: plan
 env:
   TF_VAR_arm_client_id: ${{ secrets.ARM_CLIENT_ID }}
   TF_VAR_arm_client_secret: ${{ secrets.ARM_CLIENT_SECRET }}
   TF_VAR_arm_subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
   TF_VAR_arm_tenant_id: ${{ secrets.ARM_TENANT_ID }}
 jobs:
-  build:
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@main
+  #     - name: Set up Python 3.10.14
+  #       uses: actions/setup-python@v1
+  #       with:
+  #         python-version: 3.10.14
+  #     - name: Install Dependencies for the app
+  #       run: |
+  #         cd app
+  #         python3 -m pip install --upgrade pip
+  #         pip install -r requirements.txt
+  infra_action:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@main
-      - name: Set up Python 3.10.14
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.10.14
-      - name: Install Dependencies for the app
-        run: |
-          cd app
-          python3 -m pip install --upgrade pip
-          pip install -r requirements.txt
-  terraform:
-    runs-on: ubuntu-latest
-    needs: ["build"]
+    # needs: ["build"]
     steps:                    
       - name: 'Checkout'
         uses: actions/checkout@v2
+
+      - name: 'Set up Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
       - name: 'Set up Terraform'
         uses: hashicorp/setup-terraform@v1
 
       - name: 'Terraform Init'
         run: | 
+          az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID
           cd infra/aks
           terraform init
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-      - name: 'Set up Azure CLI'
-        uses: azure/login@v1
-        with:
-          creds: ${{secrets.AZURE_CREDENTIALS}}
 
       - name: 'Terraform Format'
         run: |
           cd infra/aks
-          terraform fmt -check
-      
+          terraform fmt
+
       - name: 'Terraform Validate'
         run: |
           cd infra/aks
@@ -55,16 +74,23 @@ jobs:
 
       - name: 'Terraform Plan'
         run: |
+          az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID       
           cd infra/aks
           terraform plan -out=tfplan
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
       - name: 'Terraform Apply'
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.terraform_action == 'apply'
         run: |
+          az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID      
           cd infra/aks 
           terraform apply -auto-approve tfplan
         env:
-          ARM_CLIENT_ID: \${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: \${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: \${{ secrets.ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: \${{ secrets.ARM_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
