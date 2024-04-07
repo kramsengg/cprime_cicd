@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       terraform_action:
-        description: 'Action apply/plan'
+        description: 'Action apply/plan/destroy'
         required: true
         default: plan
 env:
@@ -96,7 +96,7 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
       - name: 'Terraform Destroy'
-        if: github.ref == 'refs/heads/main' && github.event.inputs.terraform_action == 'apply'
+        if: github.ref == 'refs/heads/main' && github.event.inputs.terraform_action == 'destroy'
         run: |
             az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID      
             cd infra/aks 
