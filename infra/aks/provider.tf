@@ -6,12 +6,12 @@ terraform {
     }
   }
 
-  # backend "azurerm" {
-  #   resource_group_name   = "tfstate-rg"
-  #   storage_account_name  = "tfstatecprime"
-  #   container_name        = "cprimestate"
-  #   key                   = "cprime.terraform.tfstate"
-  # }
+  backend "azurerm" {
+    resource_group_name   = "tfstate-rg"
+    storage_account_name  = "tfstatecprime"
+    container_name        = "cprimestate"
+    key                   = "cprime.terraform.tfstate"
+  }
 }
 
 # Configure the Microsoft Azure Provider
