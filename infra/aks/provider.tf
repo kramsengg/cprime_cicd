@@ -11,9 +11,7 @@ terraform {
     storage_account_name  = "tfstatecprime"
     container_name        = "cprimestate"
     key                   = "cprime.terraform.tfstate"
-    client_id       = var.arm_client_id
-    client_secret   = var.arm_client_secret
-    tenant_id       = var.arm_tenant_id
+
   }
 }
 
