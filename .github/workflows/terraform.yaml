@@ -47,15 +47,15 @@ jobs:
 
       - name: 'Terraform Init'
         run: | 
-          az ad sp list --all
           az account list
+          az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID
           cd infra/aks
           terraform init
-        # env:
-        #   ARM_CLIENT_ID: \${{ secrets.ARM_CLIENT_ID }}
-        #   ARM_CLIENT_SECRET: \${{ secrets.ARM_CLIENT_SECRET }}
-        #   ARM_SUBSCRIPTION_ID: \${{ secrets.ARM_SUBSCRIPTION_ID }}
-        #   ARM_TENANT_ID: \${{ secrets.ARM_TENANT_ID }}
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
       - name: 'Terraform Format'
         run: |
